@@ -10,6 +10,9 @@ import random
 # Store the image paths globally alongside thumbnails and labels
 image_paths = []
 
+#Store the image paths through intesity method
+image_paths_intensity = []
+
 # Function to deselect any selected images
 def reset_selection():
     global selected_label
@@ -27,6 +30,33 @@ def reset_selection():
 def sort_numerically(filenames):
     # Extract numbers from filenames and sort based on the numeric part
     return sorted(filenames, key=lambda x: int(re.search(r'\d+', x).group()))
+
+#Function to compute the intensity of the image
+def compute_intensity(img_path):
+    image = Image.open(img_path).convert('RGB')
+    pixels = list(image.getdata())
+    intensity = sum(.299 * r + .587 * g + .114 * b for r, g, b in pixels) / len(pixels)
+    return intensity
+
+# Function to sort filenames through intensity method and based on current image selected from the left frame
+def sort_intensity():
+    image_intesity = []
+    
+    # Compute the intensity of all images in the directory
+    filenames = [f for f in os.listdir("images") if f.endswith((".jpg", ".png", ".jpeg"))]
+    
+    #loop through each image in the directory, compute the intensity and store it in a list
+    for filename in filenames:
+        img_path = os.path.join("images", filename)
+        intensity = compute_intensity(img_path)
+        image_intesity.append((img_path, intensity))
+        
+    #sort the images based on the intensity
+    image_intesity.sort(key=lambda x: x[1])
+    
+    #store the sorted images in the global variable
+    image_paths_intensity = [x[0] for x in image_intesity]
+
 
 # Function to load images side by side, center them, and display filenames
 def load_images():
